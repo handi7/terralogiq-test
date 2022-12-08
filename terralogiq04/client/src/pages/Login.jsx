@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Card, Form, FormGroup, Alert, Label, Input, Button } from "reactstrap";
+import { Card, Alert, Label, Input, Button, Spinner } from "reactstrap";
 import { login } from "../redux/actions/authActions";
 import { Navigate } from "react-router-dom";
 
@@ -10,6 +10,7 @@ export default function Login() {
 
   const [data, setData] = useState({ email: "", password: "" });
   const [errMsg, setErrMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const onFinish = () => {
     if (!data?.email || !data?.password) {
@@ -22,6 +23,9 @@ export default function Login() {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
     setErrMsg("");
+    if (e.key === "Enter") {
+      onFinish();
+    }
   };
 
   if (user.role === "Admin") {
@@ -37,44 +41,68 @@ export default function Login() {
       <Card className="w-25 p-5 shadow">
         <h3>Login</h3>
 
-        {errMsg ? (
+        {errMsg || user?.errMsg ? (
           <Alert className="text-center" color="danger">
-            {errMsg}
+            {errMsg || user?.errMsg}
           </Alert>
         ) : null}
 
-        {/* <Form>
-          <FormGroup> */}
-        <Label>Email</Label>
-        <Input
-          name="email"
-          bsSize="sm"
-          placeholder="Email"
-          value={data.email}
-          onChange={inputHandler}
-        />
-        {/* </FormGroup>
+        <div>
+          <Label>Email</Label>
+          <Input
+            name="email"
+            bsSize="sm"
+            placeholder="Email"
+            value={data.email}
+            onChange={inputHandler}
+            onKeyDown={inputHandler}
+            disabled={user?.isLoading}
+          />
+        </div>
 
-          <FormGroup> */}
-        <Label>Password</Label>
-        <Input
-          name="password"
-          bsSize="sm"
-          placeholder="Password"
-          value={data.password}
-          onChange={inputHandler}
-        />
-        {/* </FormGroup> */}
+        <div className="my-2">
+          <Label>Password</Label>
+          <div className="d-flex position-relative justify-content-end align-items-center">
+            <Input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              bsSize="sm"
+              placeholder="Password"
+              value={data.password}
+              onChange={inputHandler}
+              onKeyDown={inputHandler}
+              disabled={user?.isLoading}
+            />
+            <Button
+              color="link"
+              size="sm"
+              className="position-absolute pe-2"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "hide" : "show"}
+            </Button>
+          </div>
+        </div>
 
         <div className="d-flex justify-content-between my-2">
-          <Button size="sm" color="primary" onClick={onFinish}>
-            Login
+          <Button
+            size="sm"
+            color="primary"
+            disabled={user?.isLoading}
+            onClick={onFinish}
+          >
+            {user?.isLoading ? (
+              <>
+                <Spinner size="sm" /> Loading...
+              </>
+            ) : (
+              "Login"
+            )}
           </Button>
           <Button size="sm" color="link">
             forgot password?
           </Button>
         </div>
-        {/* </Form> */}
       </Card>
     </div>
   );
